@@ -1,7 +1,7 @@
 <template>
   <section class="textbox">
-    <p>{{ label }}</p>
-    <textarea v-bind:placeholder="placeholder"></textarea>
+    <label :for="name">{{ label }}</label>
+    <textarea :id="name" :placeholder="placeholder"></textarea>
   </section>
 </template>
 
@@ -9,14 +9,27 @@
 export default {
   name: 'TextBox',
   props: {
+    name: String,
     label: String,
-    placeholder: String
+    placeholder: String,
+    value: String
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+textarea {
+  display: block;
+  max-width: 60rem;
+  width: 100%;
+  margin: auto;
+}
+
+label {
+  display: block;
+}
+
 h3 {
   margin: 40px 0 0;
 }

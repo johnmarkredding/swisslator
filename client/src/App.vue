@@ -1,6 +1,7 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <TextBox label="Swiss German" placeholder="Welcome to Your Vue.js App. Type Swiss German here to be translated" />
+  <TextBox label="Swiss German" name="language-input"
+    placeholder="Welcome to Your Vue.js App. Type Swiss German here to be translated" />
+  <TextBox label="English" name="language-output" placeholder="English output…" />
 </template>
 
 <script>
@@ -12,10 +13,15 @@ export default {
     TextBox
   }
 }
-console.log(process.env);
 </script>
 
 <style>
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

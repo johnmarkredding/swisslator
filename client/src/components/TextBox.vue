@@ -12,7 +12,6 @@ export default {
     name: String,
     label: String,
     placeholder: String,
-    value: String
   }
 }
 </script>

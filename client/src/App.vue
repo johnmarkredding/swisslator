@@ -1,17 +1,18 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <TextBox label="Swiss German" placeholder="Welcome to Your Vue.js App. Type Swiss German here to be translated" />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import TextBox from './components/TextBox.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    TextBox
   }
 }
+console.log(process.env);
 </script>
 
 <style>

@@ -1,4 +1,5 @@
-const { Configuration, OpenAIApi } = require("openai");
+import http from "http";
+import { Configuration, OpenAIApi } from "openai";
 
 // Setup Constants from ENV Vars.
 const OPENAI_API_KEY = process.env.OPENAI_SWISSLATOR_KEY;

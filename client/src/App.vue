@@ -13,7 +13,7 @@
 
 <script>
 import { Subject, debounceTime, distinctUntilKeyChanged, filter } from 'rxjs';
-const {VUE_APP_SWISSLATOR_API_URL:SWISSLATOR_API_URL} = process.env;
+const {VUE_APP_SWISSLATOR_API_URL: SWISSLATOR_API_URL} = process.env;
 export default {
   name: 'TranslatorComponent',
   data() {
@@ -22,15 +22,11 @@ export default {
       textB: '',
       languageA: 'Swiss',
       languageB: 'English',
-      debouncer$: new Subject(),
+      textChanges$: new Subject(),
       fetchAborter: new AbortController()
     };
   },
   methods: {
-    swapLanguages() {
-      [this.textA, this.textB] = [this.textB, this.textA];
-      [this.languageA, this.languageB] = [this.languageB, this.languageA];
-    },
     async translateText(text, language) {
       console.log("text", text, "language: " + language);
       try {
@@ -55,34 +51,41 @@ export default {
         console.error('There was a problem with the fetch operation:', error);
       }
     },
+    swapLanguages() {
+      [this.textA, this.textB] = [this.textB, this.textA];
+      [this.languageA, this.languageB] = [this.languageB, this.languageA];
+    },
     onInput({target: {value: text}}) {
-      this.debouncer$.next({text, language: this.languageA});
+      this.textChanges$.next({text, language: this.languageA});
     },
   },
   mounted() {
-    this.debouncer$
+    // Debounced and distinct values observable.
+    const distinctTextChanges = this.textChanges$
       .pipe(
         debounceTime(500),
         distinctUntilKeyChanged("text"),
-        filter(rt => rt.text !== "")
-      )
+      );
+      
+    // Translate only non-null values.
+    distinctTextChanges
+      .pipe(filter(rt => rt.text !== ""))
       .subscribe(({ text, language }) => {
         this.translateText(text, language);
       });
+    
+    // Empty second textarea when first is emptied.
+    distinctTextChanges
+      .pipe(filter(rt => rt.text === ""))
+      .subscribe(() => this.textB = "");
   },
   beforeUnmount() {
-    this.debouncer$.complete(); // Complete the Subject to clean up
+    this.textChanges$.complete();
   }
 };
 </script>
 
 <style>
-body {
-  margin: 0;
-  width: 100%;
-  min-height: 100%;
-}
-
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -91,7 +94,9 @@ body {
   color: #2c3e50;
   margin-top: 60px;
 }
+
 textarea {
+  font: inherit;
   display: block;
   max-width: 60rem;
   width: 100%;
@@ -100,6 +105,8 @@ textarea {
 
 label {
   display: block;
+  text-align: left;
+  font: inherit;
 }
 
 h3 {
@@ -119,4 +126,32 @@ li {
 a {
   color: #42b983;
 }
+
+button {
+  font: inherit;
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #dddddd;
+  padding: 0.5rem;
+  margin: 1rem;
+  font-size: 1rem;
+  font-family: 'Arial', sans-serif;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: #f8f8f8;
+    border-color: #cccccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  &:active {
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  &:focus {
+    outline: none;
+    border-color: #eb920d;
+  }
+}
+
+
 </style>

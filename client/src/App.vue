@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import { Subject, debounceTime } from 'rxjs';
-
+import { Subject, debounceTime, distinctUntilKeyChanged, filter } from 'rxjs';
+const {VUE_APP_SWISSLATOR_API_URL:SWISSLATOR_API_URL} = process.env;
 export default {
   name: 'TranslatorComponent',
   data() {
@@ -22,7 +22,8 @@ export default {
       textB: '',
       languageA: 'Swiss',
       languageB: 'English',
-      debouncer$: new Subject()
+      debouncer$: new Subject(),
+      fetchAborter: new AbortController()
     };
   },
   methods: {
@@ -33,7 +34,10 @@ export default {
     async translateText(text, language) {
       console.log("text", text, "language: " + language);
       try {
-        const response = await fetch(process.env.SWISSLATOR_API_URL, {
+        this.fetchAborter.abort();
+        this.fetchAborter = new AbortController();
+        const response = await fetch(SWISSLATOR_API_URL, {
+          signal: this.fetchAborter.signal,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -46,18 +50,22 @@ export default {
         }
 
         const data = await response.json();
-        this.textB = data.translatedText;
+        this.textB = data.text;
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       }
     },
-    onInput(event) {
-      this.debouncer$.next({ text: event.target.value, language: this.languageA });
+    onInput({target: {value: text}}) {
+      this.debouncer$.next({text, language: this.languageA});
     },
   },
   mounted() {
     this.debouncer$
-      .pipe(debounceTime(500))
+      .pipe(
+        debounceTime(500),
+        distinctUntilKeyChanged("text"),
+        filter(rt => rt.text !== "")
+      )
       .subscribe(({ text, language }) => {
         this.translateText(text, language);
       });
